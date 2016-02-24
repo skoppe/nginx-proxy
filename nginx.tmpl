@@ -73,6 +73,11 @@ server {
 {{ range $host, $containers := groupByMulti $ "Env.VIRTUAL_HOST" "," }}
 
 upstream {{ $host }} {
+{{ if (exists (printf "/etc/nginx/vhost.d/%s_proxy" $host)) }}
+        include {{ printf "/etc/nginx/vhost.d/%s_proxy" $host}};
+{{ else if (exists "/etc/nginx/vhost.d/default_proxy") }}
+        include /etc/nginx/vhost.d/default_proxy;
+{{ end }}
 {{ range $container := $containers }}
 	{{ $addrLen := len $container.Addresses }}
 	{{/* If only 1 port exposed, use that */}}
